@@ -1,49 +1,15 @@
-import { Search, MapPin, Briefcase } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 import { ServiceCard } from './ServiceCard';
+import { servicesService } from '../../services/services.service';
+import type { Service } from '../../types/models';
 
 export function ContratarView() {
-  const services = [
-    {
-      image: 'https://images.unsplash.com/photo-1622426385889-4fc93a72423a?w=400',
-      name: 'Carlos Rojas',
-      service: 'Plomero certificado',
-      rating: 5,
-      reviews: 89,
-      location: 'La Paz, Toda la ciudad',
-      verified: true,
-      priceRange: 'Bs. 150 - 300/servicio'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1659353591742-9fa64d94738e?w=400',
-      name: 'Construcciones Pro',
-      service: 'Empresa de construcción',
-      rating: 4.8,
-      reviews: 124,
-      location: 'Santa Cruz',
-      verified: true,
-      priceRange: 'Presupuesto personalizado'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1659353591752-2208c607a79f?w=400',
-      name: 'Jorge Mamani',
-      service: 'Electricista residencial',
-      rating: 4.7,
-      reviews: 56,
-      location: 'La Paz, Zona Sur',
-      verified: false,
-      priceRange: 'Bs. 100 - 250/servicio'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1659353591753-dac60f2f7896?w=400',
-      name: 'Limpieza Total',
-      service: 'Servicio de limpieza profesional',
-      rating: 4.9,
-      reviews: 203,
-      location: 'Cochabamba',
-      verified: true,
-      priceRange: 'Bs. 200 - 500/día'
-    }
-  ];
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const categories = [
     'Plomería',
@@ -55,6 +21,30 @@ export function ContratarView() {
     'Catering',
     'Logística'
   ];
+
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  const loadServices = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await servicesService.getAll();
+      setServices(response.data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error cargando servicios');
+      console.error('Error loading services:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredServices = services.filter(service =>
+    (service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    service.description?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (!selectedCategory || service.category === selectedCategory)
+  );
 
   return (
     <div className="w-full px-4 py-8">
@@ -72,6 +62,8 @@ export function ContratarView() {
             <input
               type="text"
               placeholder="¿Qué servicio necesitas?"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-12 pr-4 text-slate-900 placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
             />
           </div>
@@ -84,7 +76,12 @@ export function ContratarView() {
             {categories.map((category) => (
               <button
                 key={category}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition-all hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600"
+                onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                className={`rounded-xl border transition-all px-3 py-2.5 text-sm font-medium ${
+                  selectedCategory === category
+                    ? 'bg-blue-500 border-blue-500 text-white'
+                    : 'border-slate-300 bg-white text-slate-700 hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600'
+                }`}
               >
                 {category}
               </button>
@@ -92,49 +89,47 @@ export function ContratarView() {
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-slate-600" />
-            <select className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-all hover:border-slate-400">
-              <option>Todas las ciudades</option>
-              <option>La Paz</option>
-              <option>Santa Cruz</option>
-              <option>Cochabamba</option>
-            </select>
+        {/* Error */}
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-700">
+            {error}
+            <button 
+              onClick={loadServices}
+              className="ml-2 font-semibold underline hover:no-underline"
+            >
+              Reintentar
+            </button>
           </div>
-          <select className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-all hover:border-slate-400">
-            <option>Más valorados</option>
-            <option>Más reseñas</option>
-            <option>Precio: menor a mayor</option>
-            <option>Precio: mayor a menor</option>
-            <option>Más recientes</option>
-          </select>
-        </div>
+        )}
 
-        {/* Encabezado de resultados */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-blue-600" />
-            <p className="text-sm font-medium text-slate-600">
-              Mostrando <span className="font-bold text-slate-900">{services.length}</span> profesionales
-            </p>
+        {/* Servicios */}
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-slate-600">Cargando servicios...</div>
           </div>
-        </div>
-
-        {/* Grid de servicios */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, index) => (
-            <ServiceCard key={index} {...service} />
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="mt-12 text-center">
-          <button className="btn-primary">
-            Ver más profesionales
-          </button>
-        </div>
+        ) : filteredServices.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-slate-600">
+              {searchTerm || selectedCategory ? 'No se encontraron servicios' : 'No hay servicios disponibles'}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {filteredServices.map((service) => (
+              <ServiceCard
+                key={service.id}
+                image={service.imageUrl || 'https://via.placeholder.com/400'}
+                name={service.providerId}
+                service={service.title}
+                rating={4.5}
+                reviews={0}
+                location="Bolivia"
+                verified={false}
+                priceRange={`Bs. ${service.price}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

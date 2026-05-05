@@ -1,47 +1,37 @@
+import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { ProductCard } from './ProductCard';
+import { productsService } from '../../services/products.service';
+import type { Product } from '../../types/models';
 
 export function ComprarView() {
-  const products = [
-    {
-      image: 'https://images.unsplash.com/photo-1569062980724-23e1063d8790?w=400',
-      title: 'Ropa de segunda mano - Lote variado',
-      price: 'Bs. 120',
-      seller: 'María López',
-      rating: 4.5,
-      reviews: 23,
-      location: 'La Paz, Zona Sur',
-      badge: 'Nuevo'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1569062980724-23e1063d8790?w=400',
-      title: 'Gafas de sol originales',
-      price: 'Bs. 250',
-      seller: 'Tienda Sol & Estilo',
-      rating: 5,
-      reviews: 45,
-      location: 'Santa Cruz, Centro',
-      badge: 'Verificado'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=400',
-      title: 'Productos de hogar y cocina',
-      price: 'Bs. 80',
-      seller: 'Juan Pérez',
-      rating: 4,
-      reviews: 12,
-      location: 'Cochabamba, Norte'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1770364795029-20489cdf7b6f?w=400',
-      title: 'Bolsos y accesorios artesanales',
-      price: 'Bs. 180',
-      seller: 'Artesanías Bolivia',
-      rating: 4.8,
-      reviews: 67,
-      location: 'La Paz, Sopocachi'
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await productsService.getAll();
+      setProducts(response.data || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error cargando productos');
+      console.error('Error loading products:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const filteredProducts = products.filter(product =>
+    product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="w-full">
@@ -52,6 +42,8 @@ export function ComprarView() {
             <input
               type="text"
               placeholder="Busca productos cerca de ti..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="h-14 w-full rounded-[18px] border-0 bg-transparent pl-12 pr-4 text-[16px] text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0"
             />
           </div>
@@ -59,14 +51,50 @@ export function ComprarView() {
 
         <div className="mb-5">
           <h2 className="text-[28px] font-bold tracking-tight text-slate-900">Productos destacados</h2>
-          <p className="mt-1 text-[16px] text-slate-500">Encuentra lo que necesitas cerca de ti</p>
+          <p className="mt-1 text-[16px] text-slate-500">
+            {loading ? 'Cargando productos...' : `Encontrados ${filteredProducts.length} productos`}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:gap-6">
-          {products.map((product, index) => (
-            <ProductCard key={index} {...product} />
-          ))}
-        </div>
+        {error && (
+          <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-700">
+            {error}
+            <button 
+              onClick={loadProducts}
+              className="ml-2 font-semibold underline hover:no-underline"
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-slate-600">Cargando productos...</div>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-slate-600">
+              {searchTerm ? 'No se encontraron productos con esa búsqueda' : 'No hay productos disponibles'}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:gap-6">
+            {filteredProducts.map((product) => (
+              <ProductCard 
+                key={product.id}
+                image={product.imageUrl || 'https://via.placeholder.com/400'}
+                title={product.title}
+                price={`Bs. ${product.price}`}
+                seller={product.sellerId}
+                rating={4.5}
+                reviews={0}
+                location="Bolivia"
+                badge="Nuevo"
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

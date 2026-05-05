@@ -15,19 +15,19 @@ export const s3Service = {
     const timestamp = Date.now();
     const filename = `${timestamp}-${file.name}`;
 
-    // Opción 1: Usar endpoint Lambda para subida segura
-    return this.uploadViaLambda(file, filename);
+    // Usar endpoint Lambda para subida segura
+    return s3Service._uploadViaLambda(file, filename);
   },
 
   /**
    * Usar Lambda como intermediario para subida segura a S3
    */
-  private async uploadViaLambda(file: File, filename: string): Promise<string> {
+  async _uploadViaLambda(file: File, filename: string): Promise<string> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('filename', filename);
 
-    const response = await fetch('/api/upload-image', {
+    const response = await fetch(`${AWS_CONFIG.API_GATEWAY_URL}/upload-image`, {
       method: 'POST',
       body: formData,
       // No incluir Content-Type, el navegador lo pone automáticamente
@@ -51,7 +51,7 @@ export const s3Service = {
       throw new Error('Invalid image URL');
     }
 
-    const response = await fetch('/api/delete-image', {
+    const response = await fetch(`${AWS_CONFIG.API_GATEWAY_URL}/delete-image`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export const s3Service = {
    * Generar URL firmada para acceso temporal
    */
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
-    const response = await fetch('/api/signed-url', {
+    const response = await fetch(`${AWS_CONFIG.API_GATEWAY_URL}/signed-url`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

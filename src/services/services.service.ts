@@ -29,10 +29,11 @@ export const servicesService = {
    * Crear un nuevo servicio
    */
   async create(input: CreateServiceInput): Promise<Service> {
-    // 1. Subir imágenes a S3
-    const imageUrls = await Promise.all(
-      input.images.map((file) => s3Service.uploadImage(file))
-    );
+    // 1. Subir imágenes a S3 si existen
+    let imageUrls: string[] = [];
+    if (input.imageUrl) {
+      imageUrls = [input.imageUrl];
+    }
 
     // 2. Crear servicio en DynamoDB vía Lambda
     const serviceData = {
@@ -40,8 +41,8 @@ export const servicesService = {
       description: input.description,
       price: input.price,
       category: input.category,
-      location: input.location,
-      images: imageUrls,
+      location: input.location || '',
+      imageUrl: input.imageUrl || 'https://via.placeholder.com/400',
       providerId: input.providerId,
     };
 
@@ -58,17 +59,8 @@ export const servicesService = {
    * Actualizar un servicio
    */
   async update(id: string, data: Partial<CreateServiceInput>): Promise<Service> {
-    // Si hay nuevas imágenes, subirlas
-    let imageUrls: string[] = [];
-    if (data.images && data.images.length > 0) {
-      imageUrls = await Promise.all(
-        data.images.map((file) => s3Service.uploadImage(file))
-      );
-    }
-
     const updateData = {
       ...data,
-      ...(imageUrls.length > 0 && { images: imageUrls }),
     };
 
     const response = await apiClient.put<ApiResponse<Service>>(`/services/${id}`, updateData);

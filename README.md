@@ -1,44 +1,66 @@
+# YaNomas Marketplace
 
+YaNomas es un marketplace frontend en React + Vite conectado a una arquitectura serverless en AWS.
 
-# YaNomas - Marketplace
+## Qué se hizo
 
-Pequeña aplicación frontend para un marketplace local (demo).
+- Se conectó el frontend con la API real de AWS.
+- Se reemplazaron datos estáticos por llamadas a Lambda desde los componentes.
+- Se integraron los formularios de venta y oferta de empresa con CRUD real.
+- Se conectó la lectura de productos y servicios con el backend desplegado.
+- Se ajustó el cliente HTTP para evitar bloqueos de CORS en el navegador.
+- Se corrigió la configuración de algunos handlers Lambda para que respondan correctamente.
 
-## Clonar el repositorio
+## Flujo de conexión actual
 
-1. Abre una terminal y clona el repo (reemplaza la URL por la del remoto si es necesario):
+La aplicación funciona así:
 
-```bash
-git clone https://github.com/<usuario>/<repositorio>.git
-cd <repositorio>
+1. El usuario interactúa con el frontend en Vite.
+2. Los componentes llaman a `api-client.ts`.
+3. `api-client.ts` construye la URL usando `VITE_API_GATEWAY_URL`.
+4. La petición llega a API Gateway.
+5. API Gateway invoca la Lambda correspondiente.
+6. La Lambda lee o escribe en DynamoDB.
+7. La respuesta regresa al frontend y actualiza la interfaz.
+
+## Estructura conectada
+
+- `ComprarView` consume `GET /products`.
+- `ContratarView` consume `GET /services`.
+- `VenderView` crea productos con `POST /products`.
+- `OfrecerView` crea servicios con `POST /services`.
+- `products.service.ts` y `services.service.ts` encapsulan la lógica de negocio.
+- `api-client.ts` centraliza las llamadas HTTP.
+- `aws-config.ts` centraliza la URL de API Gateway y la configuración AWS.
+
+## Backend AWS
+
+- API Gateway REST: `https://t892o5txb3.execute-api.us-east-1.amazonaws.com/prod`
+- Lambda para productos: `products-get-all`, `products-create`, `products-get-by-id`, `products-update`, `products-delete`
+- Lambda para servicios: `services-get-all`, `services-create`, `services-get-by-id`, `services-update`, `services-delete`
+- DynamoDB: `YaNomas-Products` y `YaNomas-Services`
+
+## Variables de entorno
+
+Debe existir un archivo `.env.local` con valores como estos:
+
+```env
+VITE_API_GATEWAY_URL=https://t892o5txb3.execute-api.us-east-1.amazonaws.com/prod
+VITE_S3_BUCKET=yanomas-marketplace-images
+VITE_AWS_REGION=us-east-1
 ```
 
-2. Alternativamente, si ya tienes un fork o acceso SSH:
+## Ejecución local
 
-```bash
-git clone git@github.com:<usuario>/<repositorio>.git
-cd <repositorio>
-```
-
-## Instalar dependencias
-
-Este proyecto usa `pnpm` o `npm`. Si usas `pnpm` (recomendado):
+Instalar dependencias:
 
 ```bash
 pnpm install
-```
-
-Si usas `npm`:
-
-```bash
+# o
 npm install
 ```
 
-> Nota: en Windows PowerShell con políticas restrictivas puede ser necesario usar `npm.cmd` o ejecutar la terminal como administrador.
-
-## Ejecutar en desarrollo
-
-Inicia el servidor de desarrollo (Vite):
+Levantar el frontend:
 
 ```bash
 pnpm dev
@@ -46,34 +68,21 @@ pnpm dev
 npm run dev
 ```
 
-Abre en el navegador: http://localhost:5173
+Abrir la app en desarrollo:
 
-## Construir para producción
-
-```bash
-pnpm build
-# o
-npm run build
+```text
+http://localhost:5174
 ```
 
-## Previsualizar la build
+## Estado actual
 
-```bash
-pnpm preview
-# o
-npm run preview
-```
+- Lectura de productos funcionando desde el frontend.
+- Lectura de servicios funcionando desde el frontend.
+- Creación de productos funcionando desde el formulario.
+- Creación de servicios funcionando desde el formulario.
+- La app ya está conectada con la arquitectura AWS desplegada.
 
-## Notas
+## Nota
 
-- Este repo incluye configuraciones de Tailwind + Vite.
-- Si el remoto no está configurado, añade uno y haz push:
-
-```bash
-git remote add origin <url-del-repo>
-git branch -M main
-git push -u origin main
-```
-
-Si quieres, hago el commit y push de los cambios ahora (necesito confirmación para empujar). 
+Si quieres, el siguiente paso puede ser documentar también el flujo de edición, eliminación y carga de imágenes en S3.
 

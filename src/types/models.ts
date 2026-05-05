@@ -7,13 +7,15 @@ export interface Product {
   price: number;
   category: string;
   location: string;
-  images: string[]; // URLs de imágenes en S3
-  seller: User;
-  rating: number;
-  reviews: number;
-  createdAt: string;
-  updatedAt: string;
-  status: 'active' | 'sold' | 'inactive';
+  imageUrl?: string;
+  images?: string[]; // URLs de imágenes en S3
+  seller?: User;
+  sellerId?: string;
+  rating?: number;
+  reviews?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: 'active' | 'sold' | 'inactive';
 }
 
 export interface Service {
@@ -22,14 +24,16 @@ export interface Service {
   description: string;
   price: number;
   category: string;
-  location: string;
-  images: string[]; // URLs de imágenes en S3
-  provider: User;
-  rating: number;
-  reviews: number;
-  createdAt: string;
-  updatedAt: string;
-  status: 'active' | 'inactive';
+  location?: string;
+  imageUrl?: string;
+  images?: string[]; // URLs de imágenes en S3
+  provider?: User;
+  providerId?: string;
+  rating?: number;
+  reviews?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: 'active' | 'inactive';
 }
 
 export interface User {
@@ -60,8 +64,8 @@ export interface CreateServiceInput {
   description: string;
   price: number;
   category: string;
-  location: string;
-  images: File[]; // Para upload
+  location?: string;
+  imageUrl?: string;
   providerId: string;
 }
 
@@ -73,9 +77,10 @@ export interface ApiResponse<T> {
 }
 
 export interface ListResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
+  data?: T[];
+  items?: T[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  hasMore?: boolean;
 }
