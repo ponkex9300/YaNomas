@@ -1,0 +1,10 @@
+[
+  {
+    "IndexName": "ProviderIdIndex",
+    "KeySchema": [
+      { "AttributeName": "providerId", "KeyType": "HASH" },
+      { "AttributeName": "createdAt", "KeyType": "RANGE" }
+    ],
+    "Projection": { "ProjectionType": "ALL" }
+  }
+]

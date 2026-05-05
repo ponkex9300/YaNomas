@@ -1,0 +1,10 @@
+[
+  {
+    "IndexName": "SellerIdIndex",
+    "KeySchema": [
+      { "AttributeName": "sellerId", "KeyType": "HASH" },
+      { "AttributeName": "createdAt", "KeyType": "RANGE" }
+    ],
+    "Projection": { "ProjectionType": "ALL" }
+  }
+]

@@ -1,0 +1,1 @@
+{"statusCode":200,"headers":{"Content-Type":"application/json","Access-Control-Allow-Origin":"*"},"body":"{\"success\":true,\"data\":{\"items\":[],\"total\":0,\"page\":1,\"pageSize\":20,\"hasMore\":false}}"}

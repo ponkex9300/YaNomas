@@ -7,9 +7,13 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:lambda": "node scripts/build-lambdas.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1042.0",
+    "@aws-sdk/client-s3": "^3.1042.0",
+    "@aws-sdk/lib-dynamodb": "^3.1042.0",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.5",
@@ -41,6 +45,7 @@
     "@radix-ui/react-toggle": "1.1.2",
     "@radix-ui/react-toggle-group": "1.1.2",
     "@radix-ui/react-tooltip": "1.1.8",
+    "aws-sdk": "^2.1693.0",
     "canvas-confetti": "1.9.4",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
@@ -76,6 +81,7 @@
     "@types/react-dom": "^18.0.0",
     "@vitejs/plugin-react": "4.7.0",
     "autoprefixer": "^10.5.0",
+    "esbuild": "^0.28.0",
     "postcss": "^8.5.14",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.0.0",
