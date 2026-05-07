@@ -28,13 +28,39 @@ export const productsService = {
   /**
    * Crear un nuevo producto
    */
-  async create(input: CreateProductInput): Promise<Product> {
-    // 1. Subir imágenes a S3
-    const imageUrls = await Promise.all(
-      input.images.map((file) => s3Service.uploadImage(file))
-    );
+  async create(input: CreateProductInput): Promise<{ product: Product; imageUploadError?: string }> {
+    // 1. Intentar subir imágenes, pero continuar aunque fallen
+    let imageUrls: string[] = [];
+    let imageUploadError: string | undefined;
 
-    // 2. Crear producto en DynamoDB vía Lambda
+    if (input.images.length > 0) {
+      const s3Results = await Promise.allSettled(
+        input.images.map((file) => s3Service.uploadImage(file))
+      );
+
+      for (let i = 0; i < s3Results.length; i++) {
+        const result = s3Results[i];
+        if (result.status === 'fulfilled') {
+          imageUrls.push(result.value);
+        } else {
+          // S3 falló (probablemente CORS): usar data URL como fallback
+          console.warn(`[ProductsService] S3 falló para imagen ${i + 1}, usando data URL:`, result.reason?.message);
+          if (!imageUploadError) {
+            imageUploadError = result.reason?.message;
+          }
+          try {
+            const dataUrl = await s3Service.toDataUrl(input.images[i]);
+            imageUrls.push(dataUrl);
+            console.log(`[ProductsService] Imagen ${i + 1} guardada como data URL (${Math.round(dataUrl.length / 1024)}KB)`);
+          } catch (fallbackErr: any) {
+            console.error(`[ProductsService] Fallback data URL también falló:`, fallbackErr?.message ?? fallbackErr);
+            imageUploadError = (imageUploadError ?? '') + ` | Fallback: ${fallbackErr?.message ?? 'desconocido'}`;
+          }
+        }
+      }
+    }
+
+    // 2. Crear producto en DynamoDB vía Lambda (con o sin imágenes)
     const productData = {
       title: input.title,
       description: input.description,
@@ -45,13 +71,29 @@ export const productsService = {
       sellerId: input.sellerId,
     };
 
+    console.log('[ProductsService] Creando producto con datos:', { ...productData, images: imageUrls.length });
+
     const response = await apiClient.post<ApiResponse<Product>>('/products', productData);
-    
+
     if (!response.success) {
       throw new Error(response.error || 'Error creating product');
     }
 
-    return response.data!;
+    const product = response.data!;
+
+    // Workaround: el Lambda deployado no guarda images todavía.
+    // Guardamos las URLs en localStorage indexadas por productId.
+    if (imageUrls.length > 0 && product?.id) {
+      try {
+        const stored = JSON.parse(localStorage.getItem('yanomas_images') || '{}');
+        stored[product.id] = imageUrls[0];
+        localStorage.setItem('yanomas_images', JSON.stringify(stored));
+      } catch {
+        // localStorage no disponible, ignorar
+      }
+    }
+
+    return { product, imageUploadError };
   },
 
   /**

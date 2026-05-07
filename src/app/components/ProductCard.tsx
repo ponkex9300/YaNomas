@@ -1,4 +1,5 @@
-import { Star, MapPin } from 'lucide-react';
+import { useState } from 'react';
+import { Star, MapPin, Trash2 } from 'lucide-react';
 import { ImageWithFallback } from './ImageWithFallback';
 
 interface ProductCardProps {
@@ -10,6 +11,8 @@ interface ProductCardProps {
   reviews: number;
   location: string;
   badge?: string;
+  onDelete?: () => void;
+  deleting?: boolean;
 }
 
 export function ProductCard({
@@ -20,8 +23,18 @@ export function ProductCard({
   rating,
   reviews,
   location,
-  badge
+  badge,
+  onDelete,
+  deleting,
 }: ProductCardProps) {
+  const [confirming, setConfirming] = useState(false);
+
+  const handleDeleteClick = () => {
+    if (!confirming) { setConfirming(true); return; }
+    setConfirming(false);
+    onDelete?.();
+  };
+
   return (
     <article className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(15,23,42,0.12)]">
       <div className="relative aspect-[1.9/1] w-full overflow-hidden bg-slate-200">
@@ -35,6 +48,22 @@ export function ProductCard({
           <div className="absolute right-3 top-3 inline-flex items-center rounded-full bg-slate-900/80 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
             {badge}
           </div>
+        )}
+
+        {onDelete && (
+          <button
+            onClick={handleDeleteClick}
+            onBlur={() => setConfirming(false)}
+            disabled={deleting}
+            className={`absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold backdrop-blur transition-colors ${
+              confirming
+                ? 'bg-red-600 text-white'
+                : 'bg-slate-900/70 text-white hover:bg-red-600'
+            } disabled:opacity-50`}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {deleting ? 'Borrando...' : confirming ? '¿Confirmar?' : 'Borrar'}
+          </button>
         )}
       </div>
 

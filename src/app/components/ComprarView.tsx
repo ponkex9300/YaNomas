@@ -9,6 +9,7 @@ export function ComprarView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     loadProducts();
@@ -19,12 +20,45 @@ export function ComprarView() {
       setLoading(true);
       setError(null);
       const response = await productsService.getAll();
-      setProducts(response.data || []);
+      const raw = response as any;
+      const items: Product[] = raw?.data?.items ?? raw?.items ?? raw?.data ?? [];
+
+      // Workaround: inyectar imágenes guardadas en localStorage mientras el Lambda no las devuelve
+      let localImages: Record<string, string> = {};
+      try {
+        localImages = JSON.parse(localStorage.getItem('yanomas_images') || '{}');
+      } catch { /* ignore */ }
+
+      const enriched = items.map((p) =>
+        localImages[p.id]
+          ? { ...p, imageUrl: p.imageUrl || p.images?.[0] || localImages[p.id] }
+          : p
+      );
+
+      setProducts(enriched);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error cargando productos');
       console.error('Error loading products:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      await productsService.delete(id);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      // Limpiar imagen del localStorage
+      try {
+        const stored = JSON.parse(localStorage.getItem('yanomas_images') || '{}');
+        delete stored[id];
+        localStorage.setItem('yanomas_images', JSON.stringify(stored));
+      } catch { /* ignore */ }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al borrar el producto');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -83,7 +117,7 @@ export function ComprarView() {
             {filteredProducts.map((product) => (
               <ProductCard 
                 key={product.id}
-                image={product.imageUrl || 'https://via.placeholder.com/400'}
+                image={product.imageUrl || product.images?.[0] || 'https://via.placeholder.com/400'}
                 title={product.title}
                 price={`Bs. ${product.price}`}
                 seller={product.sellerId}

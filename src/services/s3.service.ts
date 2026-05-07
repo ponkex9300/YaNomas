@@ -11,34 +11,112 @@ export const s3Service = {
    * Opción 2: Usar un endpoint Lambda que maneje la subida
    */
   async uploadImage(file: File): Promise<string> {
-    // Generar nombre único para la imagen
     const timestamp = Date.now();
-    const filename = `${timestamp}-${file.name}`;
-
-    // Usar endpoint Lambda para subida segura
-    return s3Service._uploadViaLambda(file, filename);
+    const compressed = await s3Service._compressImage(file);
+    const filename = `${timestamp}-${compressed.name.replace(/\s+/g, '_')}`;
+    return s3Service._uploadViaLambda(compressed, filename);
   },
 
-  /**
-   * Usar Lambda como intermediario para subida segura a S3
-   */
-  async _uploadViaLambda(file: File, filename: string): Promise<string> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', filename);
-
-    const response = await fetch(`${AWS_CONFIG.API_GATEWAY_URL}/upload-image`, {
-      method: 'POST',
-      body: formData,
-      // No incluir Content-Type, el navegador lo pone automáticamente
+  // Convierte un archivo a data URL comprimida (fallback cuando S3 no está disponible).
+  // Usa canvas.toDataURL (síncrono) para garantizar un JPEG válido sin importar el formato original.
+  toDataUrl(file: File, maxSide = 600, quality = 0.72): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          URL.revokeObjectURL(objectUrl);
+          const ratio = Math.min(maxSide / img.width, maxSide / img.height, 1);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * ratio));
+          canvas.height = Math.max(1, Math.round(img.height * ratio));
+          const ctx = canvas.getContext('2d');
+          if (!ctx) throw new Error('Canvas no disponible');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (err) {
+          reject(err);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('No se pudo cargar la imagen para comprimir'));
+      };
+      img.src = objectUrl;
     });
+  },
 
-    if (!response.ok) {
-      throw new Error('Failed to upload image');
+  async _compressImage(file: File, maxSide = 1024, quality = 0.82): Promise<File> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const ratio = Math.min(maxSide / img.width, maxSide / img.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext('2d')!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => resolve(blob ? new File([blob], file.name, { type: 'image/jpeg' }) : file),
+          'image/jpeg',
+          quality,
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+      img.src = objectUrl;
+    });
+  },
+
+  async _uploadViaLambda(file: File, filename: string): Promise<string> {
+    let fileBase64: string;
+    try {
+      fileBase64 = await s3Service._fileToBase64(file);
+    } catch {
+      throw new Error('No se pudo leer el archivo de imagen');
     }
 
-    const { url } = await response.json();
-    return url; // URL de la imagen en S3
+    let response: Response;
+    try {
+      // No se envía Content-Type: application/json para evitar el CORS preflight
+      // (igual que api-client.ts). La Lambda parsea el body como JSON sin importar el content-type.
+      response = await fetch(`${AWS_CONFIG.API_GATEWAY_URL}/upload-image`, {
+        method: 'POST',
+        body: JSON.stringify({ file: fileBase64, filename }),
+      });
+    } catch (networkErr: any) {
+      throw new Error(
+        `No se pudo conectar al servidor de imágenes. Verifica tu conexión o la configuración CORS. (${networkErr?.message ?? networkErr})`,
+      );
+    }
+
+    if (response.ok) {
+      const data = await response.json();
+      if (!data?.url && !data?.data?.url) {
+        throw new Error('El servidor no devolvió la URL de la imagen');
+      }
+      return data.url ?? data.data.url;
+    }
+
+    const errorBody = await response.json().catch(() => ({}));
+    const message =
+      errorBody.error || errorBody.message || errorBody.data?.error || response.statusText;
+    throw new Error(`Error subiendo imagen (${response.status}): ${message}`);
+  },
+
+  async _fileToBase64(file: File): Promise<string> {
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.byteLength; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
   },
 
   /**

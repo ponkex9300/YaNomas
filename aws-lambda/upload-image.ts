@@ -43,7 +43,6 @@ export const handler = async (event: any) => {
       Key: key,
       Body: buffer,
       ContentType: mimeType,
-      ACL: 'public-read', // Hacer la imagen pública
     };
 
     await s3Client.send(new PutObjectCommand(params));

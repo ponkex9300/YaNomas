@@ -6,6 +6,7 @@ import type { CreateProductInput } from '../../types/models';
 export function VenderView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imageWarning, setImageWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -47,6 +48,7 @@ export function VenderView() {
     try {
       setLoading(true);
       setError(null);
+      setImageWarning(null);
       setSuccess(false);
 
       const productInput: CreateProductInput = {
@@ -55,12 +57,21 @@ export function VenderView() {
         price: parseFloat(formData.price),
         category: formData.category,
         location: formData.location,
-        sellerId: 'current-user-id', // En producción, usar ID real del usuario
+        sellerId: 'current-user-id',
         images: formData.images,
       };
 
-      await productsService.create(productInput);
-      
+      const { product, imageUploadError } = await productsService.create(productInput);
+      console.log('[VenderView] Producto creado en DynamoDB:',
+        'id:', product?.id,
+        '| images.length:', product?.images?.length,
+        '| images[0] inicio:', product?.images?.[0]?.slice(0, 60));
+
+      if (imageUploadError) {
+        setImageWarning('Imagen guardada en el producto (S3 no disponible — configura CORS en API Gateway para subir a S3).');
+        console.warn('[VenderView] S3 upload error:', imageUploadError);
+      }
+
       setSuccess(true);
       setFormData({
         title: '',
@@ -71,11 +82,11 @@ export function VenderView() {
         images: [],
       });
 
-      // Limpiar mensaje de éxito después de 3 segundos
-      setTimeout(() => setSuccess(false), 3000);
+      setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creando producto');
-      console.error('Error creating product:', err);
+      const msg = err instanceof Error ? err.message : 'Error creando producto';
+      setError(msg);
+      console.error('[VenderView] Error creating product:', err);
     } finally {
       setLoading(false);
     }
@@ -124,8 +135,14 @@ export function VenderView() {
             <h3 className="mb-4 text-xl font-bold text-slate-900">Crear nueva publicación</h3>
             
             {error && (
-              <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-700">
-                {error}
+              <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-700 text-sm">
+                <strong>Error:</strong> {error}
+              </div>
+            )}
+
+            {imageWarning && (
+              <div className="mb-6 rounded-lg bg-amber-50 border border-amber-200 p-4 text-amber-800 text-sm">
+                <strong>Aviso:</strong> {imageWarning}
               </div>
             )}
 

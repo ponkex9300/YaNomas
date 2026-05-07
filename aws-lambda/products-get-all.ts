@@ -75,7 +75,10 @@ export const handler = async (event: any) => {
     // Paginación manual (en producción usar Query con GSI)
     const items = result.Items || [];
     const total = items.length;
-    const paginatedItems = items.slice(skip, skip + pageSize);
+    const paginatedItems = items.slice(skip, skip + pageSize).map((item: any) => ({
+      ...item,
+      imageUrl: item.imageUrl || item.images?.[0],
+    }));
 
     return createSuccessResponse({
       items: paginatedItems,
