@@ -7,12 +7,16 @@
  */
 
 import { PutObjectCommand, s3Client } from './aws-clients';
-import { createSuccessResponse, createErrorResponse } from './shared-utils';
+import { createSuccessResponse, createErrorResponse, createOptionsResponse } from './shared-utils';
 
 const BUCKET_NAME = process.env.S3_BUCKET || 'yanomas-marketplace-images';
 const REGION = process.env.AWS_REGION || 'us-east-1';
 
 export const handler = async (event: any) => {
+  // Responder preflight CORS
+  if (event?.httpMethod === 'OPTIONS') {
+    return createOptionsResponse();
+  }
   try {
     // Nota: Para multipart form-data, necesitarás usar una capa de middleware
     // o procesar el evento directamente. Aquí asumimos que viene en base64.

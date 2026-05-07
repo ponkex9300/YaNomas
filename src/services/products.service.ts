@@ -33,7 +33,7 @@ export const productsService = {
     let imageUrls: string[] = [];
     let imageUploadError: string | undefined;
 
-    if (input.images.length > 0) {
+    if (input.images && input.images.length > 0) {
       const s3Results = await Promise.allSettled(
         input.images.map((file) => s3Service.uploadImage(file))
       );
@@ -43,19 +43,10 @@ export const productsService = {
         if (result.status === 'fulfilled') {
           imageUrls.push(result.value);
         } else {
-          // S3 falló (probablemente CORS): usar data URL como fallback
-          console.warn(`[ProductsService] S3 falló para imagen ${i + 1}, usando data URL:`, result.reason?.message);
-          if (!imageUploadError) {
-            imageUploadError = result.reason?.message;
-          }
-          try {
-            const dataUrl = await s3Service.toDataUrl(input.images[i]);
-            imageUrls.push(dataUrl);
-            console.log(`[ProductsService] Imagen ${i + 1} guardada como data URL (${Math.round(dataUrl.length / 1024)}KB)`);
-          } catch (fallbackErr: any) {
-            console.error(`[ProductsService] Fallback data URL también falló:`, fallbackErr?.message ?? fallbackErr);
-            imageUploadError = (imageUploadError ?? '') + ` | Fallback: ${fallbackErr?.message ?? 'desconocido'}`;
-          }
+          // Registrar error y no incluir data-URLs grandes en el payload
+          console.warn(`[ProductsService] S3 falló para imagen ${i + 1}:`, result.reason?.message);
+          if (!imageUploadError) imageUploadError = result.reason?.message;
+          // Opción: podríamos reintentar aquí o marcar la imagen como pendiente.
         }
       }
     }
