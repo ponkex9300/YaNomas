@@ -84,32 +84,51 @@ export function OfrecerView() {
   };
 
   return (
-    <div className="w-full bg-[#f5f5f5] px-4 py-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 overflow-hidden rounded-xl bg-gradient-to-br from-[#007AFF] to-[#0066DD] p-8 text-white shadow-lg">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
-            <Building2 className="h-8 w-8" />
+    <div className="w-full pt-4">
+      <div className="mx-auto max-w-[1320px]">
+        <div className="relative mb-8 overflow-hidden rounded-[24px] border border-slate-200 bg-gradient-to-b from-white to-[#eef2ff] px-6 py-8 shadow-[0_8px_28px_rgba(15,23,42,0.06)] lg:px-10 lg:py-10">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-indigo-200/20 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-8 -left-8 h-36 w-36 rounded-full bg-indigo-200/20 blur-xl" />
+          <div className="relative z-10">
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-indigo-700">
+              <Building2 className="h-3.5 w-3.5" />
+              Para empresas
+            </span>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
+              <div>
+                <h2 className="mb-2 text-[28px] font-bold leading-tight tracking-tight text-slate-900 sm:text-[34px]">
+                  Lleva tu empresa al siguiente nivel
+                </h2>
+                <p className="max-w-xl text-[15px] leading-relaxed text-slate-500">
+                  Únete al marketplace más grande de Bolivia y conecta con clientes que necesitan tus servicios
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50/80 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/60 hover:shadow-sm">
+                  <p className="text-xl font-bold text-slate-900">+32%</p>
+                  <p className="text-indigo-600">más visibilidad</p>
+                </div>
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50/80 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-100/60 hover:shadow-sm">
+                  <p className="text-xl font-bold text-slate-900">3</p>
+                  <p className="text-indigo-600">pasos simple</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 className="mb-2 text-2xl font-semibold">Lleva tu empresa al siguiente nivel</h2>
-          <p className="mb-6 text-white/90">
-            Únete al marketplace más grande de Bolivia y conecta con clientes que necesitan tus servicios
-          </p>
         </div>
 
-        <div className="mb-6">
-          <h3 className="mb-4 font-semibold text-[#1A1A1A]">Beneficios para tu empresa</h3>
-          <div className="grid gap-4">
+        <div className="mb-8">
+          <h3 className="mb-5 text-[20px] font-bold tracking-tight text-slate-900">Beneficios para tu empresa</h3>
+          <div className="grid gap-4 md:grid-cols-3">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon;
               return (
-                <div key={index} className="flex gap-4 rounded-xl bg-white p-4 shadow-sm">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-[#007AFF]/10">
-                    <Icon className="h-6 w-6 text-[#007AFF]" />
+                <div key={index} className="group rounded-[20px] border border-slate-200 bg-white p-5 shadow-[0_4px_16px_rgba(15,23,42,0.06)] transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_12px_32px_rgba(10,108,255,0.10)]">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-[14px] bg-[#0A6CFF]/10 transition-colors duration-300 group-hover:bg-[#0A6CFF]">
+                    <Icon className="h-6 w-6 text-[#0A6CFF] transition-colors duration-300 group-hover:text-white" />
                   </div>
-                  <div>
-                    <h4 className="mb-1 font-medium text-[#1A1A1A]">{benefit.title}</h4>
-                    <p className="text-sm text-[#666666]">{benefit.description}</p>
-                  </div>
+                  <h4 className="mb-1 text-[16px] font-bold text-slate-900">{benefit.title}</h4>
+                  <p className="text-sm leading-relaxed text-slate-500">{benefit.description}</p>
                 </div>
               );
             })}

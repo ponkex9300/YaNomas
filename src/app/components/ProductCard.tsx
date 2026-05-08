@@ -36,7 +36,7 @@ export function ProductCard({
   };
 
   return (
-    <article className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.08)] transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_34px_rgba(15,23,42,0.12)]">
+    <article className="overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,23,42,0.13)]">
       <div className="relative aspect-[1.9/1] w-full overflow-hidden bg-slate-200">
         <ImageWithFallback
           src={image}

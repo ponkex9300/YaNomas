@@ -23,7 +23,7 @@ export function ServiceCard({
   priceRange
 }: ServiceCardProps) {
   return (
-    <div className="group overflow-hidden rounded-2xl card hover:shadow-xl transition-all duration-300">
+    <div className="group overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_4px_16px_rgba(15,23,42,0.07)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(15,23,42,0.13)]">
       {/* Imagen */}
       <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300">
         <ImageWithFallback

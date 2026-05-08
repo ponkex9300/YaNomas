@@ -68,19 +68,17 @@ export function ComprarView() {
   );
 
   return (
-    <div className="w-full">
+    <div className="w-full pt-4">
       <div className="mx-auto max-w-[1320px]">
-        <div className="mb-8 rounded-[24px] border border-slate-200 bg-white px-4 py-4 shadow-[0_8px_28px_rgba(15,23,42,0.06)] sm:px-5">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Busca productos cerca de ti..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-14 w-full rounded-[18px] border-0 bg-transparent pl-12 pr-4 text-[16px] text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0"
-            />
-          </div>
+        <div className="mb-8 flex items-center gap-3 rounded-[24px] border border-slate-200 bg-white px-5 py-1 shadow-[0_8px_28px_rgba(15,23,42,0.06)]">
+          <Search className="h-5 w-5 flex-shrink-0 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Busca productos cerca de ti..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-14 flex-1 border-0 bg-transparent text-[16px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+          />
         </div>
 
         <div className="mb-5">
@@ -113,9 +111,9 @@ export function ComprarView() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-7 gap-y-12">
             {filteredProducts.map((product) => (
-              <ProductCard 
+              <ProductCard
                 key={product.id}
                 image={product.imageUrl || product.images?.[0] || 'https://via.placeholder.com/400'}
                 title={product.title}

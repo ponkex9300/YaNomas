@@ -10,19 +10,18 @@ export default function App() {
   const [selectedType, setSelectedType] = useState<'comprar' | 'contratar' | 'vender' | 'ofrecer'>('comprar');
 
   return (
-    <div className="min-h-screen bg-[#f6f7fb] text-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-[#f0f4ff] via-[#f6f7fb] to-[#f0f4ff] text-slate-900">
       <Header />
-      <main className="mx-auto flex w-full max-w-[1320px] flex-col gap-8 px-4 pb-10 pt-5 sm:px-6 lg:px-8">
-        <section className="pt-2 sm:pt-4">
+      <main className="mx-auto flex w-full max-w-[1320px] flex-col px-4 pb-20 pt-8 sm:px-6 lg:px-8">
+        <div className="mb-16">
           <UserTypeSelector selectedType={selectedType} onSelectType={setSelectedType} />
-        </section>
-
-        <section>
+        </div>
+        <div>
           {selectedType === 'comprar' && <ComprarView />}
           {selectedType === 'contratar' && <ContratarView />}
           {selectedType === 'vender' && <VenderView />}
           {selectedType === 'ofrecer' && <OfrecerView />}
-        </section>
+        </div>
       </main>
     </div>
   );

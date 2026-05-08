@@ -93,38 +93,47 @@ export function VenderView() {
   };
 
   return (
-    <div className="w-full px-4 py-8 lg:py-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-slate-900 px-6 py-8 text-white shadow-xl">
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div>
-              <span className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-100 backdrop-blur">
-                <Sparkles className="h-3.5 w-3.5" />
-                Modo vendedor profesional
-              </span>
-              <h2 className="mb-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Publica rápido, con mejor presencia y más conversiones.
-              </h2>
-              <p className="max-w-2xl text-sm leading-6 text-emerald-50/90 sm:text-base">
-                Conecta con los mejores compradores en la plataforma de manera fácil y rápida.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 text-sm">
-              <div className="rounded-2xl bg-white/10 p-4 text-center backdrop-blur">
-                <TrendingUp className="mx-auto mb-2 h-5 w-5 text-white" />
-                <p className="font-bold text-white">+32%</p>
-                <p className="text-emerald-100">visibilidad</p>
+    <div className="w-full px-4 pt-4 pb-8 lg:pb-10">
+      <div className="mx-auto max-w-[1320px]">
+        <div className="relative mb-8 overflow-hidden rounded-[24px] border border-emerald-200 bg-gradient-to-b from-white to-emerald-50 px-6 py-8 shadow-[0_8px_28px_rgba(15,23,42,0.06)] lg:px-10 lg:py-10">
+          <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-emerald-300/30 blur-2xl" />
+          <div className="pointer-events-none absolute -bottom-8 -left-8 h-36 w-36 rounded-full bg-emerald-300/25 blur-xl" />
+          <div className="relative z-10">
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-100 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">
+              <Sparkles className="h-3.5 w-3.5" />
+              Modo vendedor profesional
+            </span>
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
+              <div>
+                <h2 className="mb-2 text-[28px] font-bold leading-tight tracking-tight text-slate-900 sm:text-[34px]">
+                  Publica rápido, con mejor presencia y más conversiones.
+                </h2>
+                <p className="max-w-xl text-[15px] leading-relaxed text-emerald-600">
+                  Conecta con los mejores compradores en la plataforma de manera fácil y rápida.
+                </p>
               </div>
-              <div className="rounded-2xl bg-white/10 p-4 text-center backdrop-blur">
-                <Package className="mx-auto mb-2 h-5 w-5 text-white" />
-                <p className="font-bold text-white">3 pasos</p>
-                <p className="text-emerald-100">publicación</p>
-              </div>
-              <div className="rounded-2xl bg-white/10 p-4 text-center backdrop-blur">
-                <CheckCircle2 className="mx-auto mb-2 h-5 w-5 text-white" />
-                <p className="font-bold text-white">Simple</p>
-                <p className="text-emerald-100">y rápido</p>
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow-md">
+                  <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
+                    <TrendingUp className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="font-bold text-slate-900">+32%</p>
+                  <p className="text-emerald-600">visibilidad</p>
+                </div>
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow-md">
+                  <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
+                    <Package className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="font-bold text-slate-900">3 pasos</p>
+                  <p className="text-emerald-600">publicación</p>
+                </div>
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-100 hover:shadow-md">
+                  <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600">
+                    <CheckCircle2 className="h-4 w-4 text-white" />
+                  </div>
+                  <p className="font-bold text-slate-900">Simple</p>
+                  <p className="text-emerald-600">y rápido</p>
+                </div>
               </div>
             </div>
           </div>
@@ -221,15 +230,15 @@ export function VenderView() {
                   <label className="mb-2 block text-sm font-medium text-[#1A1A1A]">
                     Precio (Bs.)
                   </label>
-                  <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#666666]" />
+                  <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-3 shadow-sm focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20">
+                    <DollarSign className="h-5 w-5 flex-shrink-0 text-slate-400" />
                     <input
                       type="number"
                       name="price"
                       value={formData.price}
                       onChange={handleInputChange}
                       placeholder="150"
-                      className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                      className="min-w-0 flex-1 border-0 bg-transparent py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-0"
                     />
                   </div>
                 </div>
@@ -258,15 +267,15 @@ export function VenderView() {
                 <label className="mb-2 block text-sm font-medium text-[#1A1A1A]">
                   Ubicación
                 </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#666666]" />
+                <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-3 shadow-sm focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20">
+                  <MapPin className="h-5 w-5 flex-shrink-0 text-slate-400" />
                   <input
                     type="text"
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
                     placeholder="La Paz, Zona Sur"
-                    className="w-full rounded-xl border border-slate-300 bg-slate-50 py-3 pl-10 pr-4 text-slate-900 placeholder-slate-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    className="min-w-0 flex-1 border-0 bg-transparent py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-0"
                   />
                 </div>
               </div>
