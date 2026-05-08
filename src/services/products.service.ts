@@ -52,12 +52,15 @@ export const productsService = {
     }
 
     // 2. Crear producto en DynamoDB vía Lambda (con o sin imágenes)
+    const primaryImageUrl = imageUrls[0] || '';
+
     const productData = {
       title: input.title,
       description: input.description,
       price: input.price,
       category: input.category,
       location: input.location,
+      imageUrl: primaryImageUrl,
       images: imageUrls,
       sellerId: input.sellerId,
     };
@@ -70,21 +73,7 @@ export const productsService = {
       throw new Error(response.error || 'Error creating product');
     }
 
-    const product = response.data!;
-
-    // Workaround: el Lambda deployado no guarda images todavía.
-    // Guardamos las URLs en localStorage indexadas por productId.
-    if (imageUrls.length > 0 && product?.id) {
-      try {
-        const stored = JSON.parse(localStorage.getItem('yanomas_images') || '{}');
-        stored[product.id] = imageUrls[0];
-        localStorage.setItem('yanomas_images', JSON.stringify(stored));
-      } catch {
-        // localStorage no disponible, ignorar
-      }
-    }
-
-    return { product, imageUploadError };
+    return { product: response.data!, imageUploadError };
   },
 
   /**
@@ -99,8 +88,11 @@ export const productsService = {
       );
     }
 
+    const primaryImageUrl = imageUrls[0] || '';
+
     const updateData = {
       ...data,
+      ...(primaryImageUrl ? { imageUrl: primaryImageUrl } : {}),
       ...(imageUrls.length > 0 && { images: imageUrls }),
     };
 
